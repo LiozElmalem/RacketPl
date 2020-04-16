@@ -7,6 +7,7 @@
 
  (: plSuffixContained : (Listof String) -> Any)
 
+ ; Input - list of strings , Output - #f or the current suffix that founded.
  ; Recoursive function that implements by simple stop condition and first and last options that give us the recoursive iterative.
  ; In addition , the 'string-suffix' functionality help me to solve it easily.
  (define (plSuffixContained list)
@@ -23,6 +24,7 @@
 
  (: write-poly : (Listof Number) -> String)
 
+ ; Input - list of numbers , Output - polynomial string.
  ; Like the previous function, I use stop conditions here, but some are unlike the previous one.
  ;The let operation declare the initialize output , every stop condition here decide the string output body.
  ; Functions like 'string-append' very useful here to decrease the code lines.
@@ -43,7 +45,10 @@
 
  (: compute-poly : Number (Listof Number) -> Number)
 
- ; NEED TO IMPLEMENT IT 
+ ; Input - list of number and other number , Output - series of calculation that given (x^n * list(n) + ..... + x^0 * list(0)).
+ ; Same implementation to the previous function.
+ ; Tail recoursive style shown here in the body of the condition statments.
+ ; NEED TO IMPLEMENT IT IN TAIL RECOURSIVE
  (define (compute-poly num list)
       (cond
          [(empty? list) 0]
@@ -56,7 +61,7 @@
  
  ;; Question 3
 
- ; Simple define of type 'KeyStack' with 2 constructors.
+ ; Classic define of type 'KeyStack' with 2 constructors.
  ; The constructors show us 2 body styles of 'KeyStack'.
  (define-type KeyStack 
    [EmptyKS]
@@ -65,6 +70,7 @@
 
  (: search-stack : Symbol KeyStack -> Any)
 
+ ; Input - symbol and stack , Output - #f or string that we looking for.
  ; Using cases here for type 'KeyStack'.
  ; The equalitaion between the sym and symbol variabales decide which answer need to return.
  (define (search-stack symbol stack)
@@ -76,6 +82,8 @@
 
  (: pop-stack : KeyStack -> Any)
 
+ ; Input - stack , Output - #f if empty stack or the current stack without the last item that we added.
+ ; Every pop functionality based on this condition statments , the empty case and the negative one.
  ; Simple implementation of pop item function , return the stack pointer.
  (define (pop-stack stack)
    (cases stack 
@@ -100,7 +108,7 @@
  ;; Question 4
 
  (: is-odd? : Natural -> Boolean)
- ;; << Add your comments here>>
+ ;; << Add your comments here>> 
  ;; << Add your comments here>>
  (define (is-odd? x)
    (if (zero? x) 
@@ -111,7 +119,7 @@
  
  (: is-even? : Natural -> Boolean)
  ;; << Add your comments here>> 
- ;;<< Add your comments here>>
+ ;; << Add your comments here>>
  (define (is-even? x)
    (if (zero? x)
       true
