@@ -1,0 +1,15 @@
+#lang pl
+
+(+ 2 3)
+
+(test (+ 2 3) => 5)
+
+(:f:Number -> Number)
+
+(define (f i) (if(eq? 3 3) true false))
+
+(f 9)
+
+(define lioz "lioz")
+
+(if (= 2 3) true false)
