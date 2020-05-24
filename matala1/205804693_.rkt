@@ -1,0 +1,234 @@
+#lang pl
+
+ #|
+    Introduction  
+    In this assignment, you discovered how to write simple procedures in pl plus a way to define variables.
+    Throughout the code, I wrote notes trying to best explain how to work but not the way of learning ...
+    Learning was done in my try and catch style and basically while writing the code and with Dr.Racket's
+    platform I found the errors and slowly understood the order of things, if The explanations are not satisfactory I would love to know next.
+ |#
+
+ ;; Question 1
+
+ ; On this question, the hard part was understanding the role of brackets
+ ; and how to run the functions themselves.
+
+ (: plSuffixContained : (Listof String) -> (U Boolean String))
+  ; Input - list of strings , Output - #f or the current suffix that founded.
+  ; Recoursive function that implements by simple stop condition and first and last options that give us the recoursive iterative.
+  ; In addition , the 'string-suffix' functionality help me to solve it easily.
+  (define (plSuffixContained list)
+       (if (= 0 (length list)) 
+          false  
+          (if (eq? (substring (first list) (- (string-length (first list)) 1) (string-length (first list))) "pl") (first list) (plSuffixContained (rest list)))
+     )  
+ )            
+   
+ (test (plSuffixContained '("pllp" "plyy" "ppp" "lpTT"
+    "lol")) => false)
+
+ ;; Question 2.1
+
+ ; On this question, the hard part w9as the tail recursive implementation link
+
+ (: write-poly : (Listof Number) → String)
+  ; Input - list of numbers , Output - polynomial string.
+  ; Like the previous function, I use stop conditions here, but some are unlike the previous one.
+  ; The let operation declare the initialize output , every stop condition here decide the string output body.
+  ; Functions like 'string-append' very useful here to decrease the code lines.
+  ; We can see the tail recoursive body with the assistant function.
+
+ (define (write-poly list)
+    (helper list "")
+   )
+ 
+ (: helper :(Listof Number) String → String)
+ (define (helper list output)
+  (cond 
+      [(= 0 (length list)) output]   
+      [(= 2 (length list)) (string-append output (number->string (first list)) "x+" (helper (rest list) output))] 
+      [(= 1 (length list)) (string-append output (number->string (first list)) (helper (rest list) output))]
+      [else (string-append output (number->string (first list))  "x^" (number->string (- (length list) 1)) "+" (helper (rest list) output))]
+   ) 
+ )
+ 
+ (test (write-poly '(3 2 6)) => "3x^2+2x+6")
+ (test (write-poly '()) => "")
+ (test (write-poly '(7 8 9 10)) => "7x^3+8x^2+9x+10")
+
+ ;; Question 2.2
+ (: compute-poly : Number (Listof Number) -> Number)
+
+ ; Here the difficulties were quite similar to the difficulties in question 2.1,
+ ; it was very easy for me to solve after I solved it.
+
+ ; Input - list of number and other number , Output - series of calculation that given (x^n * list(n) + ..... + x^0 * list(0)).
+ ; Same implementation to the previous function.
+ ; Tail recoursive body shown here in the body of the condition statments.
+ ; We can see the tail recoursive body with the assistant function.
+
+ (define (compute-poly num list)
+   (helper_compute_poly num list)
+   )  
+  
+ (: helper_compute_poly : Number (Listof Number) → Number)
+ (define (helper_compute_poly num list)
+  (cond
+         [(= 0 (length list)) 0]
+         [else (+ (* (first list) (expt num (- (length list) 1))) (helper_compute_poly num (rest list)))]
+     )
+  )      
+   
+ (test (compute-poly 2 '()) => 0) 
+ (test (compute-poly 2 '(3 2 6)) => 22)
+ (test (compute-poly 3 '(4 3 -2 0)) => 129)
+
+ ;; Question 3
+
+ ; The hard part about the third question is, for me, how to define the climb and of
+ ; course how not the way I went until I realized that the constructors were responsible for the nature of the department, empty or full.
+
+ ; Classic define of type 'KeyStack' with 2 constructors.
+ ; The constructors show us 2 body styles of 'KeyStack'.
+ ; With 'cases' functionality , we can to identify every KeyStack item according to is 'body style' , empty or fully.
+ (define-type KeyStack 
+   [EmptyKS]
+   [Push Symbol String KeyStack]
+  )
+
+ (: search-stack : Symbol KeyStack -> (U Boolean String))
+
+ ; Input - symbol and stack , Output - #f or string that we looking for.
+ ; Using cases here for type 'KeyStack'.
+ ; The equalitaion between the sym and symbol variabales decide which answer need to return.
+ (define (search-stack symbol stack)
+   (cases stack 
+        [(EmptyKS) #f]
+        [(Push sym x stack) (if (eq? symbol sym) x #f)]
+     )
+  )
+
+ (: pop-stack : KeyStack -> (U KeyStack Boolean))
+
+ ; Input - stack , Output - #f if empty stack or the current stack without the last item that we added.
+ ; Every pop functionality based on this condition statments , the empty case and the negative one.
+ ; Simple implementation of pop item function , return the stack pointer.
+ (define (pop-stack stack)
+   (cases stack 
+        [(EmptyKS) #f]
+        [(Push sym x stack) stack]
+     )
+ ) 
+ 
+ ; Stack tests
+(test (EmptyKS) => (EmptyKS))
+  
+ (test (Push 'b "B" (Push 'a "A" (EmptyKS))) =>  
+      (Push 'b "B" (Push 'a "A" (EmptyKS)))) 
+ (test (Push 'a "AAA" (Push 'b "B" (Push 'a "A"  (EmptyKS)))) => (Push 'a "AAA" (Push 'b "B" (Push 'a "A" (EmptyKS))))) 
+
+ (test (search-stack 'a (Push 'a "AAA" (Push 'b "B" (Push 'a "A" (EmptyKS))))) => "AAA") 
+ (test (search-stack 'c (Push 'a "AAA" (Push 'b "B" (Push 'a "A" (EmptyKS))))) => #f) 
+
+ (test (pop-stack (Push 'a "AAA" (Push 'b "B" (Push 'a "A" (EmptyKS))))) => (Push 'b "B" (Push 'a "A" (EmptyKS)))) 
+ (test (pop-stack (EmptyKS)) => #f) 
+ 
+ ;; Question 4
+
+ ; On this question I did not go through many difficulties,
+ ; I wrote in completely free text what I think the functions perform.
+
+ (: is-odd? : Natural -> Boolean)
+ ;; This function present odd number checker in non-recoursive way , the function get natural number
+ ;; as input and return boolean answer about his type . We can see that is-odd function and is-even function
+ ;; play together to return the current answer , That is one check per function until we arrived to x = 0.
+ ;; The interesting side of realizing the function is the use of a strange recursion,
+ ;; which is actually aided by another function that uses the above function in exactly the same way,
+ ;; that is ... there are quite unique interactions here for both functions is-even and is-odd.
+ (define (is-odd? x)
+   (if (zero? x) 
+      false
+      (is-even? (- x 1))
+      )
+   ) 
+ 
+ (: is-even? : Natural -> Boolean)
+ ;; This function, like the previous one, gets a natural number and returns a boolean answer to whether the given number is even or equal ...
+ ;; The similarity of the functions also explains their relationship.
+ ;; In fact, each of the functions uses the other quite directly,
+ ;; which means that assembling these functions will give us an answer about number parity.
+ (define (is-even? x)
+   (if (zero? x)
+      true
+      (is-odd? (- x 1))
+      )
+   ) 
+ 
+ ;; The tests examine three simple cases of the function:
+ ;; 1. End cases like sending 0 to both functions and seeing a response of the first condition written in both
+ ;; 2. Sending a number greater than 1 or 0 to see the "ping pong" functions performed between them over time.
+ ;; 3. Sending 1 to both functions to understand if the second condition actually works directly with just one session for each function (sending 1 - 1 per second and parity checking)
+ (test (not (is-odd? 12)))
+ (test (is-even? 12)) 
+ (test (not (is-odd? 0)))
+ (test (is-even? 0))
+ (test (is-odd? 1))
+ (test (not (is-even? 1))) 
+ 
+ (: every? : (All (A) (A -> Boolean) (Listof A) -> Boolean))
+ ;; This function checks whether the condition defined as "pred" exists for all organs of the list.
+ ;; In fact, the function accepts the condition and list and can perform the necessary procedures for testing with a simple recursion , 
+ ;; Equal to zero we will return the desired answer.
+ ;; In fact, in this recursion we do quite similar actions to a number scheme only here that I "plus" the terms and finally the blank
+ ;; list question whose answer is known in advance when we reach the end of the list creates one big condition that returns the correct answer
+ (define (every? pred lst)
+    (or (null? lst)
+       (and (pred (first lst))
+           (every? pred (rest lst))
+           )
+       )
+   ) 
+ 
+  (: all-even? :   (Listof Natural) -> Boolean)
+ ;; This function is accepted as a list input only and can ask,
+ ;; without too much complexity, whether all the list elements are evenly paired, ie returning a boolean answer.
+ ;; The power of this function is huge, shortening the code lines and of course cleaner and clearer code is just some of the uses of such functions.
+ ;; Different uses can be:
+ ;; 1. Loops and variables savings.
+ ;; 2. Clean and easy to understand recursion style, a short code that provides loads.
+ ;; 3. Engaging with multiple dimensions can be more pleasant with recursive code on lists, because matrices that represent the dimension in which we are composed of lists of organs describing them.
+ ;; 4. Easy and convenient search of the list, for any condition we want.
+(define (all-even? lst)
+   (every? is-even? lst)) 
+ 
+ 
+ ;; In these tests we can see various tests to check the function of the function
+ ;; 1. Sending a list containing only 0 is a pretty interesting case study that should return a positive answer because 0 is an even number and that means all the list organs are even (there is only one).
+ ;; 2. Submit a list containing only paired organs, more than one organ to test the functionality in its entirety and understand whether the function performs recursions along several iterations correctly.
+ ;; 3. Like the second example, here we send an example expecting a negative answer, we expect only one non-spousal organ to cause the great expression of the condition (and) to be basically false.
+ ;; 4. Like the first example, sending a list with a single organ that should return a negative answer, the number 1 is odd.
+ ;; 5. The most interesting example for me is the last example, the name of 3 spousal organs and also one spousal organ.
+ ;; On the face of it the function should pass it easily if you passed the third example but here the test is stronger in the negative.
+(test (all-even? (list 0)))
+ (test (all-even? (list 2 4 6 8)))
+ (test (not (all-even? (list 1 3 5 7))))
+ (test (not (all-even? (list 1))))
+ (test (not (all-even? (list 2 4 1 6)))) 
+ 
+  
+ (: every2? : (All (A B) (A -> Boolean) (B -> Boolean) (Listof A) (Listof B) -> Boolean))
+ ;; In this function we see that we get two terms and two lists, but not just two conditions but two unknown functions that we know that do a calculation and return a boolean answer,
+ ;; that is ... A and B are two variables that represent a type that is calculated ( All reserve that emphasizes that we do not know what type of climbing is.
+ ;; The functionality here is pretty clear, we check that all the first list organs meet the first condition and all the second
+ ;; list organs comply with the second condition while not reaching the end of the first list (assuming the two lists share the same size).
+ ;; Basically A and B represent template type that is interpreted in runtime and this
+ ;; is the most interesting part of the last function that we haven't seen so far in the other functions.
+ (define (every2? pred1 pred2  lst1 lst2)
+   (or (null? lst1)
+      ;; both lists assumed to be of same length
+      (and (pred1 (first lst1))
+          (pred2 (first lst2))
+          (every2? pred1 pred2 (rest lst1) (rest lst2))
+          )
+      )
+   ) 
