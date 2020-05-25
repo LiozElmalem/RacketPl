@@ -185,7 +185,7 @@
 
 ; Part B
 
-  #|
+#|
 
 <WAE> ::= <num> 
    | {+ <WAE> <WAE>}
@@ -221,7 +221,7 @@
     [(list '* lhs rhs) (MulW (parse-sexprW lhs) (parse-sexprW rhs))]
     [(list '/ lhs rhs) (DivW (parse-sexprW lhs) (parse-sexprW rhs))]
     [else (error 'parse-sexprW "bad syntax in ~s" sexpr)]))
-
+ 
 (: parseW : String -> WAE)
 (define (parseW str)
   (parse-sexprW (string->sexpr str)))
@@ -254,15 +254,50 @@
            (substW named-expr from to)
            (if (eq? bound-id from)
                bound-body
-               (substW bound-body from to)))]))
+               (substW bound-body from to)))]
+    ))
 
 (: freeInstanceList : WAE -> (Listof Symbol))
-(define (freeInstanceList expr) '())
- 
-;(test (freeInstanceList (parseW "w")) => '(w))
-;(test (freeInstanceList (parseW "{with {xxx 2} {with {yyy 3} {+ {- xx y} z}}}")) => '(xx y z))
-;(test (freeInstanceList (WithW 'x (NumW 2) (AddW (IdW 'x) (NumW 3)))) => '())
-;(test (freeInstanceList (parseW "{+ z {+ x z}}")) => '(z x z))
+(define (freeInstanceList expr)
+  (cases expr
+    [(NumW number:n) '()] 
+    [(AddW l r) (append (freeInstanceList l) (freeInstanceList r))]
+    [(SubW l r) (append (freeInstanceList l) (freeInstanceList r))]
+    [(MulW l r) (append (freeInstanceList l) (freeInstanceList r))]
+    [(DivW l r) (append (freeInstanceList l) (freeInstanceList r))]
+    [(IdW name) (list name)]
+    [(WithW bound-id named-expr bound-body)
+     (cases named-expr
+       [(NumW n)
+        (if (null? (member bound-id (freeInstanceList bound-body)))
+           (cons bound-id (freeInstanceList bound-body))
+           (remv bound-id (freeInstanceList bound-body)))]
+       [else (append (cons bound-id (freeInstanceList named-expr)) (freeInstanceList bound-body))]
+      ) 
+    ]
+  ) 
+)
+
+(test (freeInstanceList (parseW "w")) => '(w))
+(test (freeInstanceList (parseW "{with {xxx 2} {with {yyy 3} {+ {- xx y} z}}}")) => '(xx y z))
+(test (freeInstanceList (AddW (IdW 'x) (NumW 3))) => '(x))
+(test (freeInstanceList (WithW 'x (NumW 2) (AddW (IdW 'x) (NumW 3)))) => '())
+(test (freeInstanceList (parseW "{+ z {+ x z}}")) => '(z x z))
+(test (freeInstanceList (parseW "{with {x {+ p l}} {+ y z}}")) => '(x p l y z))
+(test (freeInstanceList (parseW "5")) => '())
+(test (freeInstanceList (NumW 5)) => '())
+(test (freeInstanceList (AddW (NumW 2) (IdW 'x))) => '(x))
+(test (freeInstanceList (parseW "{+ 2 x}")) => '(x))
+(test (freeInstanceList (parseW "{+ 2 {with {xxx 2} {with {yyy 3} {+ {- xx y} z}}}}")) => '(xx y z))
+(test (freeInstanceList (parseW "{+ y {with {xxx 2} {with {yyy 3} {+ {- xx y} z}}}}")) => '(y xx y z))
+(test (freeInstanceList (AddW (IdW 'xxx) (IdW 'yyy))) => '(xxx yyy))
+(test (freeInstanceList (AddW (NumW 3) (IdW 'vvv))) => '(vvv))
+(test (freeInstanceList (AddW (IdW 'xxx) (IdW 'yyy))) => '(xxx yyy))
+(test (freeInstanceList (SubW (IdW 'xxx) (IdW 'yyy))) => '(xxx yyy))
+(test (freeInstanceList (MulW (IdW 'xxx) (IdW 'yyy))) => '(xxx yyy))
+(test (freeInstanceList (DivW (IdW 'xxx) (IdW 'yyy))) => '(xxx yyy))
+(test (freeInstanceList (IdW 'xx)) => '(xx))
+
 
 
 
