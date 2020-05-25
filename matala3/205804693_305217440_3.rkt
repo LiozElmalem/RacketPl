@@ -270,9 +270,9 @@
      (cases named-expr
        [(NumW n)
         (if (null? (member bound-id (freeInstanceList bound-body)))
-           (cons bound-id (freeInstanceList bound-body))
+           (cons bound-id (freeInstanceList bound-body)) 
            (remv bound-id (freeInstanceList bound-body)))]
-       [else (append (cons bound-id (freeInstanceList named-expr)) (freeInstanceList bound-body))]
+       [else (append (freeInstanceList (IdW bound-id)) (freeInstanceList named-expr) (freeInstanceList bound-body))]
       ) 
     ]
   ) 
@@ -297,9 +297,4 @@
 (test (freeInstanceList (MulW (IdW 'xxx) (IdW 'yyy))) => '(xxx yyy))
 (test (freeInstanceList (DivW (IdW 'xxx) (IdW 'yyy))) => '(xxx yyy))
 (test (freeInstanceList (IdW 'xx)) => '(xx))
-
-
-
-
-
-
+(test (freeInstanceList (WithW 'x (IdW 'y) (IdW 'z))) => '(x y z))
