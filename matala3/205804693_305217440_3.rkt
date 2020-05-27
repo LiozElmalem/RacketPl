@@ -1,7 +1,5 @@
   #lang pl
 
-;  ---------------------              TODO : comments and tests            ---------------------
-
 ; Part A
 
   #| BNF for the MUWAE language:
@@ -16,7 +14,16 @@
   |#
 
   ;; MUWAE abstract syntax trees
-  (define-type MUWAE
+
+ ; At the first mission , i added Sqrt option/functionality to MUWAE type.
+ ; We were asked to add the SQRT option to the MUWAE type,
+ ; with the function supposed to get a copy of the type (any of them) and of course return
+ ; the requested one (sqrt original goal function).
+ ; Input : MUWAE
+ ; Output : MUWAE
+ ; I have not encountered any problem to solve the question, so unfortunately I do not have so much to expand.
+
+ (define-type MUWAE
     [Num (Listof Number)]
     [Add  MUWAE MUWAE]
     [Sub  MUWAE MUWAE]
@@ -28,6 +35,15 @@
 
   (: parse-sexpr : Sexpr -> MUWAE)
   ;; to convert s-expressions into MUWAE
+
+ ; As requested for changes, there are some adjustments along the way in all the functions that implement MUWAE operations,
+ ; so here we added a MUWAE variable conversion capability when it is itself a Sqrt and accordingly we
+ ; return the variable we expect.
+ ; Input : Sexpr
+ ; Output : MUWAE
+ ; In the solution process, we wanted to interpret an expression for the MUWAE type and so we wanted to
+ ; return the Sqrt which knows how to return the type with a copy of the type you will receive.
+
   (define (parse-sexpr sexpr)
     (match sexpr
       [(list (number: n) ...) (if (null? n) (error 'parse-sexpr "bad syntax in ~s" sexpr) (Num n))]  
@@ -68,6 +84,14 @@
   ;; substitutes the second argument with the third argument in the
   ;; first argument, as per the rules of substitution; the resulting
   ;; expression contains no free instances of the second argument
+
+ ; In this case , we used in subst functionality to implement the Sqrt type case to get the values that we want to evaluate.
+ ; The realization itself is simple and here is
+ ; basically first recognition with the options of subst.
+ ; Input : MUWAE Symbol MUWAE
+ ; Output : MUWAE
+ ; In this case , we only added the Sqrt expr case to determine the new functionality of MUWAE.
+
   (define (subst expr from to)
     (cases expr
       [(Num n) expr]
@@ -94,7 +118,16 @@
        eval(id)        = error!
        eval({with {x E1} E2}) = eval(E2[eval(E1)/x])
   |#
- ;(if (>= var 0) (list (sqrt var) (- 0 (sqrt var))) (error 'eval "`sqrt' requires a nonnegative input"))
+
+ ; It is basically the function that is responsible for calculating the two desired values ​​of
+ ; the Sqrt operator for a numeric value.
+ ; 0 - value and value present the answer ,
+ ; More and when negative numbers are not included as part of the legal input collection.
+ ; Input : Listof Number
+ ; Output : Listof Number
+ ; In the solution process of this question, we faced the understanding difficulty of adjusting the
+ ; recursive mode of the Racket's language and the purpose of the function and eventually realized that we had a
+ ; great way to create a list of results using a null condition if the list remained empty.
 
   (: sqrt+ : (Listof Number) -> (Listof Number)) 
   (define (sqrt+ ns)  
@@ -103,7 +136,15 @@
         [(< (first ns) 0) (error 'eval "`sqrt' requires a nonnegative input")]
         [else (cons (sqrt (first ns)) (cons (- 0 (sqrt (first ns))) (sqrt+ (rest ns))))]
      )     
-   ) 
+   )
+
+ ; bin-op is a function to calculate a two-list procedure when the procedure is play on a
+ ; Cartesian multiplication of the lists.
+ ; Because the skeleton was pretty clear, I don't have too much on how to elaborate
+ ; on the learning or realization process I experienced with my preoccupation with bin-op.
+ ; Input : (Number Number -> Number) (Listof Number) (Listof Number)
+ ; Output : (Listof Number)
+ ; We did not actually experience any difficulties in realizing the function because of the template we received.
 
  (: bin-op : (Number Number -> Number) (Listof Number) (Listof Number) -> (Listof Number)) 
  ;; applies a binary numeric function on all combinations of numbers from 
@@ -114,7 +155,16 @@
      (: f : Number -> Number) 
     (define (f var) (op l var)) (map f rs)) 
    (if (null? ls) null (append (helper (first ls) rs) (bin-op op (rest ls) rs)))) 
- 
+
+
+  ; In this function, we were actually asked to calculate the same expression we created and belonged to MUWAE's Sqrt,
+  ; which of course requires the use of sqrt + that we wrote up, of course we wanted to get a list of numbers in sqrt+
+  ; and so we sent it the list obtained from eval.
+  ; Input : MUWAE
+  ; Output : Listof Number
+  ; The addition that we had to implement to this function was actually quite trivial after we had already added the
+  ; relevant sqrt + function and so the implementation was actually clear from the start.
+
   (: eval : MUWAE -> (Listof Number))
   ;; evaluates WAE expressions by reducing them to numbers
   (define (eval expr)
@@ -256,6 +306,19 @@
                bound-body
                (substW bound-body from to)))]
     ))
+
+ ; In this question, we were asked to implement a function that would basically look for the same free variables in
+ ; our MUWAE expression, in order to actually enforce the programmer's willingness during code writing in the language
+ ; we created ... In fact, here again we make sure of syntactic and thoughtful readiness.
+ ; Our goal is to go over the code in a systematic and recursive way to find a match or equally mismatch and to
+ ; issue an error message if needed, if we find a match between each variable and some numeric value we assume the expression
+ ; is completely correct and we return it.
+ ; Input : WAE
+ ; Output : Listof Symbol
+ ; In realizing this function, the help we received from Racket member function was absolutely tremendous,
+ ; since it was much longer in the beginning until we were exposed to member benefits.
+ ; In addition, with the baseline here which is a blank list combination we actually needed the same recursive
+ ; realization for most WAE type types and a drop in detail in case.
 
 (: freeInstanceList : WAE -> (Listof Symbol))
 (define (freeInstanceList expr)
